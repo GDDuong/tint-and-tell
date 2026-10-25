@@ -15,6 +15,11 @@ const en = {
   'setup.start': 'Start game',
   'setup.online': 'Play online with friends',
   'setup.hint': '3–8 players · one shared device · pass screens keep guesses secret',
+  'setup.howTitle': 'How it plays',
+  'setup.how1': 'The cue giver sees the target and says a one-word cue.',
+  'setup.how2': 'Everyone else places two pawns on the colors that fit the cue.',
+  'setup.how3': 'Closer pawns score more. The highest total after the last round wins.',
+  'setup.repo': 'View source',
 
   'common.random': 'Random',
   'common.round': 'Round {n} of {total}',
@@ -299,6 +304,11 @@ const vi: Record<StringKey, string> = {
   'setup.start': 'Bắt đầu',
   'setup.online': 'Chơi online cùng bạn bè',
   'setup.hint': '3–8 người · một thiết bị chung · màn đổi người giữ bí mật lượt đoán',
+  'setup.howTitle': 'Cách chơi',
+  'setup.how1': 'Người gợi ý thấy màu mục tiêu và nói một từ gợi ý.',
+  'setup.how2': 'Những người còn lại đặt hai quân vào ô màu phù hợp với gợi ý.',
+  'setup.how3': 'Quân càng gần càng nhiều điểm. Tổng điểm cao nhất sau vòng cuối sẽ thắng.',
+  'setup.repo': 'Xem mã nguồn',
 
   'common.random': 'Ngẫu nhiên',
   'common.round': 'Vòng {n}/{total}',

@@ -10,7 +10,9 @@ import { OptionsMenu } from './SettingsPanel';
 import { SoundToggle } from './SoundToggle';
 import { playSfx, setSfxMuted } from './sfx';
 import {
+  COLS,
   DEFAULT_SETTINGS,
+  PALETTE,
   PAWN_HIDDEN_COLOR,
   PLAYER_COLORS,
   buildOrder,
@@ -39,6 +41,18 @@ type Phase =
   | { k: 'final' };
 
 type TFunc = (key: StringKey, vals?: Vals) => string;
+
+const HERO_COLS = 12;
+const HERO_BOARD = Array.from(
+  { length: HERO_COLS * 5 },
+  (_, i) =>
+    PALETTE[(6 + Math.floor(i / HERO_COLS)) * COLS + 1 + (i % HERO_COLS) * 2].oklch,
+);
+const HERO_TARGET = HERO_COLS * 2 + 8;
+const HERO_PAWNS: Record<number, string> = {
+  [HERO_TARGET - 2]: PLAYER_COLORS[0],
+  [HERO_TARGET + HERO_COLS + 1]: PLAYER_COLORS[1],
+};
 
 function roleFor(next: Phase, t: TFunc): string {
   if (next.k === 'pick') return t('role.pick');
@@ -116,98 +130,146 @@ function Setup({
 
   return (
     <>
-      <header className="setup-head">
-        <div className="setup-top">
-          <div className="logo" aria-hidden="true">
-            {PLAYER_COLORS.slice(0, 4).map((color) => (
-              <i key={color} style={{ background: color }} />
-            ))}
-          </div>
-          <div className="topbar-right">
-            <LangToggle />
-            <SoundToggle on={soundOn} onToggle={onToggleSound} />
-            <AppSettings />
-          </div>
-        </div>
-        <p className="eyebrow">{t('setup.tagline')}</p>
-        <h1>
-          Tint <span className="amp">&</span> Tell
-        </h1>
-        <p className="muted">{t('setup.blurb')}</p>
-      </header>
-
-      <div className="panel setup">
-        <div className="setup-label">
-          <p className="panel-title">{t('setup.players', { count: names.length })}</p>
-          <button className="ghost small-btn" type="button" onClick={add} disabled={names.length >= 8}>
-            {t('setup.addPlayer')}
-          </button>
-        </div>
-
-        <div className="players">
-          {names.map((name, index) => (
-            <div className="player-block" key={index}>
-              <div className="player-row">
-                <button
-                  className="swatch-btn"
-                  type="button"
-                  onClick={() => setOpenColor(openColor === index ? null : index)}
-                  aria-label={t('color.change')}
-                  aria-expanded={openColor === index}
-                >
-                  <span className="swatch" style={{ background: colors[index] }} />
-                </button>
-                <input
-                  value={name}
-                  onChange={(event) => setName(index, event.target.value)}
-                  placeholder={t('setup.playerName', { n: index + 1 })}
-                  maxLength={16}
-                  aria-label={t('setup.nameLabel', { n: index + 1 })}
-                />
-                <button
-                  className="icon-btn"
-                  type="button"
-                  onClick={() => remove(index)}
-                  disabled={names.length <= 3}
-                  aria-label={t('setup.removeLabel', { n: index + 1 })}
-                >
-                  ×
-                </button>
-              </div>
-              {openColor === index ? (
-                <ColorDots
-                  value={Math.max(0, PLAYER_COLORS.indexOf(colors[index]))}
-                  used={colors
-                    .filter((_, i) => i !== index)
-                    .map((color) => PLAYER_COLORS.indexOf(color))}
-                  onPick={(color) => pickColor(index, color)}
-                />
-              ) : null}
-            </div>
+      <div className="setup-bar">
+        <div className="logo" aria-hidden="true">
+          {PLAYER_COLORS.slice(0, 4).map((color) => (
+            <i key={color} style={{ background: color }} />
           ))}
         </div>
+        <div className="topbar-right">
+          <a
+            className="repo-link"
+            href="https://github.com/GDDuong/tint-and-tell"
+            target="_blank"
+            rel="noreferrer"
+            aria-label={t('setup.repo')}
+            title={t('setup.repo')}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"
+              />
+            </svg>
+            <span className="repo-label">{t('setup.repo')}</span>
+          </a>
+          <LangToggle />
+          <SoundToggle on={soundOn} onToggle={onToggleSound} />
+          <AppSettings />
+        </div>
+      </div>
 
-        <label className="field">
-          <span>{t('setup.startingGiver')}</span>
-          <select value={start} onChange={(event) => setStart(Number(event.target.value))}>
-            <option value={-1}>{t('common.random')}</option>
-            {clean.map((name, index) => (
-              <option key={index} value={index}>
-                {name}
-              </option>
+      <div className="setup-stage">
+        <header className="setup-hero">
+          <p className="eyebrow">{t('setup.tagline')}</p>
+          <h1 className="hero-title">
+            Tint <span className="amp">&</span> Tell
+          </h1>
+          <p className="hero-blurb">{t('setup.blurb')}</p>
+          <div className="hero-lower">
+            <div className="hero-board" aria-hidden="true">
+              {HERO_BOARD.map((color, index) => (
+                <span
+                  key={index}
+                  style={{ background: color }}
+                  className={index === HERO_TARGET ? 'target' : undefined}
+                >
+                  {HERO_PAWNS[index] ? <i style={{ background: HERO_PAWNS[index] }} /> : null}
+                </span>
+              ))}
+            </div>
+            <div className="quick-rules">
+              <p className="panel-title">{t('setup.howTitle')}</p>
+              <ol>
+                {(['setup.how1', 'setup.how2', 'setup.how3'] as const).map((key, index) => (
+                  <li key={key}>
+                    <span>{index + 1}</span>
+                    <p>{t(key)}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </header>
+
+        <div className="panel setup">
+          <div className="setup-label">
+            <p className="panel-title">{t('setup.players', { count: names.length })}</p>
+            <button
+              className="ghost small-btn"
+              type="button"
+              onClick={add}
+              disabled={names.length >= 8}
+            >
+              {t('setup.addPlayer')}
+            </button>
+          </div>
+
+          <div className="players">
+            {names.map((name, index) => (
+              <div className="player-block" key={index}>
+                <div className="player-row">
+                  <button
+                    className="swatch-btn"
+                    type="button"
+                    onClick={() => setOpenColor(openColor === index ? null : index)}
+                    aria-label={t('color.change')}
+                    aria-expanded={openColor === index}
+                  >
+                    <span className="swatch" style={{ background: colors[index] }} />
+                  </button>
+                  <input
+                    value={name}
+                    onChange={(event) => setName(index, event.target.value)}
+                    placeholder={t('setup.playerName', { n: index + 1 })}
+                    maxLength={16}
+                    aria-label={t('setup.nameLabel', { n: index + 1 })}
+                  />
+                  <button
+                    className="icon-btn"
+                    type="button"
+                    onClick={() => remove(index)}
+                    disabled={names.length <= 3}
+                    aria-label={t('setup.removeLabel', { n: index + 1 })}
+                  >
+                    ×
+                  </button>
+                </div>
+                {openColor === index ? (
+                  <ColorDots
+                    value={Math.max(0, PLAYER_COLORS.indexOf(colors[index]))}
+                    used={colors
+                      .filter((_, i) => i !== index)
+                      .map((color) => PLAYER_COLORS.indexOf(color))}
+                    onPick={(color) => pickColor(index, color)}
+                  />
+                ) : null}
+              </div>
             ))}
-          </select>
-        </label>
+          </div>
 
-        <OptionsMenu settings={settings} onChange={onSettings} canEdit />
+          <label className="field">
+            <span>{t('setup.startingGiver')}</span>
+            <select value={start} onChange={(event) => setStart(Number(event.target.value))}>
+              <option value={-1}>{t('common.random')}</option>
+              {clean.map((name, index) => (
+                <option key={index} value={index}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <button className="primary wide" type="button" onClick={startGame}>
-          {t('setup.start')}
-        </button>
-        <button className="ghost wide" type="button" onClick={onOnline}>
-          {t('setup.online')}
-        </button>
-        <p className="hint-line">{t('setup.hint')}</p>
+          <OptionsMenu settings={settings} onChange={onSettings} canEdit />
+
+          <button className="primary wide" type="button" onClick={startGame}>
+            {t('setup.start')}
+          </button>
+          <button className="ghost wide" type="button" onClick={onOnline}>
+            {t('setup.online')}
+          </button>
+          <p className="hint-line">{t('setup.hint')}</p>
+        </div>
       </div>
     </>
   );
@@ -378,7 +440,7 @@ export default function App() {
 
   if (phase.k === 'setup') {
     return (
-      <div className="app">
+      <div className="app setup-app">
         <Setup
           initial={players}
           onStart={startMatch}
