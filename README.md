@@ -1,8 +1,14 @@
 # Tint & Tell
 
-A pass-and-play browser party game: one player gives word cues for a target color on a 24×20 grid, everyone else places two pawns and scores by closeness.
+A browser party game: one player gives word cues for a target color on a 24×20 grid, everyone else places two pawns and scores by closeness.
 
-M0 is entirely local. No server, accounts, or persistence.
+Play local pass-and-play or online rooms with text and voice chat.
+
+## Play
+
+https://tint-and-tell.onrender.com
+
+Free Render instance: the first visit after ~15 minutes idle takes about a minute to wake.
 
 ## Run
 
