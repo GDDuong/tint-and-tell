@@ -386,7 +386,7 @@ export default function Online({
 
   if (!room) {
     return (
-      <div className="app">
+      <div className="app setup-app online-app">
         <div className="topbar">
           <button className="ghost small-btn" type="button" onClick={back}>
             {t('online.back')}
@@ -397,16 +397,16 @@ export default function Online({
             <AppSettings />
           </div>
         </div>
-        <div className="setup-head">
+        <header className="setup-hero online-hero">
           <div className="logo" aria-hidden="true">
             {PLAYER_COLORS.slice(0, 4).map((color) => (
               <i key={color} style={{ background: color }} />
             ))}
           </div>
           <p className="eyebrow">{t('online.eyebrow')}</p>
-          <h1>{t('online.title')}</h1>
-          <p className="muted">{t('online.blurb')}</p>
-        </div>
+          <h1 className="hero-title online-title">{t('online.title')}</h1>
+          <p className="hero-blurb">{t('online.blurb')}</p>
+        </header>
         <div className="panel setup">
           <form
             className="stack"
